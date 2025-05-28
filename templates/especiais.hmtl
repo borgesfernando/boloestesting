@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="tituloPagina">Como Participar</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <script defer src="../js/config.js"></script>
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const projeto = PROJETOS.especiais.projetos.find(p => p.id === id);
+
+      if (!projeto) {
+        document.body.innerHTML = '<div class="container"><h1>Projeto não encontrado</h1></div>';
+        return;
+      }
+      
+      const nomeMeses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+      const mesInicioNome = nomeMeses[parseInt(projeto.mesInicio) - 1];
+      const mesFimNome = nomeMeses[parseInt(projeto.mesFim) - 1];
+
+      document.title = `Como Participar - ${projeto.nome}`;
+      document.getElementById("tituloPagina").textContent = `Como Participar - ${projeto.nome}`;
+      document.getElementById("headerTitle").textContent = "Como Participar";
+      document.getElementById("headerSubtitle").innerHTML = `${projeto.nome}<br>Apuração: ${projeto.dataSorteio}`;
+      document.getElementById("footerTituloBolao").textContent = `Participe do nosso Bolão Especial para a ${projeto.nome}!`;
+      document.getElementById("infoProjeto").innerHTML = `
+        <ul>
+          <li>Nome: <strong>${projeto.nome}</strong></li>
+          <li>Cota: <strong>R$ ${projeto.cota},00</strong> (${projeto.parcelas} x R$ ${projeto.valorMes},00)</li>
+          <li>Parcelas mensais: de <strong>${mesInicioNome}</strong> a <strong>${mesFimNome}</strong>, com pagamento unicamente no dia <strong>${projeto.diaPix}</strong> de cada mês</li>
+          <li>Data limite de pagamento da última parcela: <strong>${projeto.dataLimite}</strong></li>
+          <li>Data do sorteio: <strong>${projeto.dataSorteio}</strong></li>
+          <li>100% do valor arrecadado é convertido em apostas</li>
+          </ul>`;
+      document.body.style.setProperty("--secondary", `rgb(${projeto.corPrimaria})`);
+
+      gerarTextoEntrada(projeto);
+    });
+
+function gerarTextoEntrada(projeto) {
+  const nomeMeses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  const entradaDiv = document.getElementById("valoresEntradaDinamico");
+  const hoje = new Date();
+  const mesAtual = hoje.getMonth() + 1;
+  const mesInicio = parseInt(projeto.mesInicio);
+  const mesFim = parseInt(projeto.mesFim);
+  const valorMes = projeto.valorMes;
+
+  const limite = Math.min(mesFim, mesAtual + 1);
+  let html = '<ul>';
+
+  for (let mes = mesInicio; mes <= limite; mes++) {
+    let valorTotal = 0;
+    for (let i = mesInicio; i <= mes; i++) {
+      valorTotal += i < mes ? valorMes + 1 : valorMes;
+    }
+
+    const nomeMes = nomeMeses[mes - 1];
+    html += `<li><strong>${nomeMes}</strong> → R$ ${valorTotal},00`;
+
+    // Exibe a frase se ainda houver meses no projeto (mes < mesFim)
+    if (mes < mesFim) {
+      html += `<br>👉🏼 A partir do mês seguinte, siga com as parcelas mensais no valor normal!`;
+    }
+
+    html += `</li>`;
+  }
+
+  html += '</ul>';
+  entradaDiv.innerHTML = html;
+}
+</script>
+
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 id="headerTitle"></h1>
+      <p id="headerSubtitle"></p>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="content-card">
+      <h2>DETALHES DO PROJETO</h2>
+      <div id="infoProjeto"></div>
+
+      <div class="highlight-box">
+        <h2>POSSO PARTICIPAR?</h2>
+        <p>Sim! Os requisitos para sua participação no Bolão são:</p>
+        <ul>
+          <li>Ser ex-integrante de projetos anteriores ou indicado.</li>
+          <li>Acreditar na sorte e no grupo.</li>
+          <li>Compromisso com os pagamentos mensais.</li>
+          <li>WhatsApp ativo e aceitação de grupo administrado somente pelo organizador.</li>
+        </ul>
+      </div>
+
+      <h2>PREMIAÇÃO</h2>
+      <ul>
+        <li>Se o rateio for um valor significativo, será repassado via PIX para cada participante.</li>
+        <li>Se o valor for inferior a uma cota, o prêmio será reinvestido em novos concursos acumulados até a finalização. Eventuais novos prêmios seguirão a mesma lógica.</li>
+      </ul>
+
+      <h2>ENTRADA APÓS O INÍCIO DO ANO</h2>
+      <div id="valoresEntradaDinamico"></div>
+
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeGURdHgTYpsLF4hcW45xlHJGkdqv4ubCNr3lvGk4dGCcTqxw/viewform" class="btn">Quero Participar</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <h3 id="footerTituloBolao">Participe do nosso bolão mensal!</h3>
+      <p style="margin: 1rem 0;">Junte-se a nós e aumente suas chances de ganhar!</p>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSeGURdHgTYpsLF4hcW45xlHJGkdqv4ubCNr3lvGk4dGCcTqxw/viewform" class="btn sb2025" target="_blank">Quero Participar</a>
+
+      <p style="margin-top: 1.5rem;">© Borges 2025 - Todos os direitos reservados</p>
+      <p style="margin-top: 0.5rem;">
+        Organizado por
+        <a href="mailto:correiodofernando@gmail.com"
+           style="color: #0077C8;
+                  text-decoration: none;
+                  transition: all 0.3s ease;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 4px;">
+          Borges
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="#0077C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 6L12 13L2 6" stroke="#0077C8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
