@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Ordena concursos especiais por dataLimite (mais próximo primeiro)
+  // 1. Ordena concursos especiais por dataLimite (mais próximo primeiro)
   const especiaisOrdenados = PROJETOS.especiais.projetos.slice().sort((a, b) => {
+    // Converte "DD/MM/AAAA" para "MM/DD/AAAA"
     const dta = new Date(a.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
     const dtb = new Date(b.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
     return dta - dtb;
@@ -8,11 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
   carregarProjetos('mensais', PROJETOS.mensais.projetos, 'mensais-list', 'mensais.html');
   carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
-});
 
-
-// AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
-(function exibirAvisoTopo() {
+  // 2. AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
   const especiais = PROJETOS.especiais.projetos;
   const hoje = new Date();
 
@@ -25,28 +23,30 @@ document.addEventListener("DOMContentLoaded", () => {
     .filter(p => p.dataLimiteObj > hoje)
     .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj)[0];
 
-  if (!proximo) return;
-
-  const diasRestantes = Math.ceil((proximo.dataLimiteObj - hoje) / (1000 * 60 * 60 * 24));
-  // Aparece só se faltar 15 dias ou menos, e some se já passou
-  if (diasRestantes > 0 && diasRestantes <= 15) {
-    const mensagem = `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para garantir sua cota no Bolão "${proximo.nome}"!<br><span class="aviso-fechamento">Fechamento no dia ${proximo.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1/$2/$3')}!</span>`;
-    document.getElementById("mensagemAviso").innerHTML = mensagem;
-    document.getElementById("btnParticipar").href = "templates/especiais.html?id=" + proximo.id;
-    document.getElementById("avisoTopo").style.display = "flex";
+  if (proximo) {
+    const diasRestantes = Math.ceil((proximo.dataLimiteObj - hoje) / (1000 * 60 * 60 * 24));
+    // Aparece só se faltar 15 dias ou menos, e some se já passou
+    if (diasRestantes > 0 && diasRestantes <= 15) {
+      const mensagem = `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para garantir sua cota no Bolão "${proximo.nome}"!<br><span class="aviso-fechamento">Fechamento no dia ${proximo.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1/$2/$3')}!</span>`;
+      document.getElementById("mensagemAviso").innerHTML = mensagem;
+      document.getElementById("btnParticipar").href = "templates/especiais.html?id=" + proximo.id;
+      document.getElementById("avisoTopo").style.display = "flex";
+    }
   }
-})();
+});
 
+// ================================================
+// Mantém a função carregarProjetos normalmente:
 function carregarProjetos(tipo, projetos, containerId, templateFile) {
   const container = document.getElementById(containerId);
   projetos.forEach(projeto => {
-    //const tipoCor = projeto.id.split('-')[0]; // ex: lf, quina, mega
     const tipoCor = {
-    'ds': 'dupla',
-    'lf': 'lotofacil',
-    'quina': 'quina',
-    'mega': 'mega'
+      'ds': 'dupla',
+      'lf': 'lotofacil',
+      'quina': 'quina',
+      'mega': 'mega'
     }[projeto.id.split('-')[0]] || projeto.id.split('-')[0];
+
     const btnClasse = tipoCor;
     const card = document.createElement("div");
     card.className = `project-card ${tipoCor}`;
@@ -67,7 +67,6 @@ function carregarProjetos(tipo, projetos, containerId, templateFile) {
       </div>
       <a href="${link}" class="btn ${btnClasse}">${textoBotao}</a>
     `;
-
     container.appendChild(card);
   });
 }
