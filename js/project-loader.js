@@ -4,6 +4,33 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
 });
 
+// AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
+(function exibirAvisoTopo() {
+  const especiais = PROJETOS.especiais.projetos;
+  const hoje = new Date();
+
+  // Encontra o próximo especial com data limite no futuro
+  const proximo = especiais
+    .map(p => ({
+      ...p,
+      dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
+    }))
+    .filter(p => p.dataLimiteObj > hoje)
+    .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj)[0];
+
+  if (!proximo) return;
+
+  const diasRestantes = Math.ceil((proximo.dataLimiteObj - hoje) / (1000 * 60 * 60 * 24));
+  // Aparece só se faltar 15 dias ou menos, e some se já passou
+  if (diasRestantes > 0 && diasRestantes <= 15) {
+    const mensagem = `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para garantir sua cota no Bolão "${proximo.nome}"!<br>Fechamento no dia ${proximo.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1/$2/$3')}!`;
+    document.getElementById("mensagemAviso").innerHTML = mensagem;
+    document.getElementById("btnParticipar").href = "templates/especiais.html?id=" + proximo.id;
+    document.getElementById("avisoTopo").style.display = "flex";
+  }
+})();
+
+
 function carregarProjetos(tipo, projetos, containerId, templateFile) {
   const container = document.getElementById(containerId);
   projetos.forEach(projeto => {
