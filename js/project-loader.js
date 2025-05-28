@@ -1,44 +1,40 @@
-function parseDataBRparaDate(str) {
-  // Aceita 1 ou 2 dígitos para dia/mês, 4 dígitos para ano
-  const parts = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!parts) return null;
-  return new Date(parts[3], parts[2]-1, parts[1]);
-}
-
 document.addEventListener("DOMContentLoaded", () => {
+  // 1. Ordena concursos especiais por dataLimite (mais próximo primeiro)
   const hojeLimpo = new Date();
   hojeLimpo.setHours(0,0,0,0);
-
-  // Usa a função robusta para TODAS as datas
-  const especiaisComDatas = PROJETOS.especiais.projetos.map(p => ({
+  
+  const especiais = PROJETOS.especiais.projetos.slice().map(p => ({
     ...p,
-    dataLimiteObj: parseDataBRparaDate(p.dataLimite)
+    dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
   }));
-
-  // Ativos: dataLimite >= hoje (ordem crescente)
-  const especiaisAtivos = especiaisComDatas
-    .filter(p => p.dataLimiteObj && p.dataLimiteObj >= hojeLimpo)
+  
+  // Ativos: dataLimite >= hoje, ordenados do mais próximo para o mais distante
+  const especiaisAtivos = especiais
+    .filter(p => p.dataLimiteObj >= hojeLimpo)
     .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj);
-
-  // Vencidos: dataLimite < hoje (ordem decrescente)
-  const especiaisPassados = especiaisComDatas
-    .filter(p => p.dataLimiteObj && p.dataLimiteObj < hojeLimpo)
+  
+  // Já passados: dataLimite < hoje, ordenados do mais recente para o mais antigo
+  const especiaisPassados = especiais
+    .filter(p => p.dataLimiteObj < hojeLimpo)
     .sort((a, b) => b.dataLimiteObj - a.dataLimiteObj);
-
-  // Junta: ativos, depois passados
+  
+  // Junta: ativos primeiro, passados depois
   const especiaisOrdenados = [...especiaisAtivos, ...especiaisPassados];
 
   carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
-  // ...os outros carregamentos e aviso continuam iguais
-});
+  carregarProjetos('mensais', PROJETOS.mensais.projetos, 'mensais-list', 'mensais.html');
+  carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
 
   // 2. AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
-  // Usa a mesma lista especiaisComDatas para reaproveitar o parse de data
+  const especiais = PROJETOS.especiais.projetos;
   const hoje = new Date();
-  hoje.setHours(0,0,0,0); // garantir comparações no mesmo dia
 
   // Encontra o próximo especial com data limite no futuro
-  const proximo = especiaisComDatas
+  const proximo = especiais
+    .map(p => ({
+      ...p,
+      dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
+    }))
     .filter(p => p.dataLimiteObj > hoje)
     .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj)[0];
 
@@ -55,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================================================
-// Função permanece igual
+// Mantém a função carregarProjetos normalmente:
 function carregarProjetos(tipo, projetos, containerId, templateFile) {
   const container = document.getElementById(containerId);
   projetos.forEach(projeto => {
