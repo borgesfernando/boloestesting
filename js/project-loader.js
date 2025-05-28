@@ -1,11 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
   // 1. Ordena concursos especiais por dataLimite (mais próximo primeiro)
-  const especiaisOrdenados = PROJETOS.especiais.projetos.slice().sort((a, b) => {
-    // Converte "DD/MM/AAAA" para "MM/DD/AAAA"
-    const dta = new Date(a.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
-    const dtb = new Date(b.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
-    return dta - dtb;
-  });
+  const hojeLimpo = new Date();
+  hojeLimpo.setHours(0,0,0,0);
+  
+  const especiais = PROJETOS.especiais.projetos.slice().map(p => ({
+    ...p,
+    dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
+  }));
+  
+  // Ativos: dataLimite >= hoje, ordenados do mais próximo para o mais distante
+  const especiaisAtivos = especiais
+    .filter(p => p.dataLimiteObj >= hojeLimpo)
+    .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj);
+  
+  // Já passados: dataLimite < hoje, ordenados do mais recente para o mais antigo
+  const especiaisPassados = especiais
+    .filter(p => p.dataLimiteObj < hojeLimpo)
+    .sort((a, b) => b.dataLimiteObj - a.dataLimiteObj);
+  
+  // Junta: ativos primeiro, passados depois
+  const especiaisOrdenados = [...especiaisAtivos, ...especiaisPassados];
+
   carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
   carregarProjetos('mensais', PROJETOS.mensais.projetos, 'mensais-list', 'mensais.html');
   carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
