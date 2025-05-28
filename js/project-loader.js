@@ -1,24 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Ordena concursos especiais por dataLimite (mais próximo primeiro)
+  // 1. Ordena concursos especiais por dataLimite (mais próximo primeiro, depois vencidos)
   const hojeLimpo = new Date();
   hojeLimpo.setHours(0,0,0,0);
-  
-  const especiais = PROJETOS.especiais.projetos.slice().map(p => ({
+
+  // Adiciona a propriedade dataLimiteObj já convertida
+  const especiaisComDatas = PROJETOS.especiais.projetos.slice().map(p => ({
     ...p,
     dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
   }));
-  
-  // Ativos: dataLimite >= hoje, ordenados do mais próximo para o mais distante
-  const especiaisAtivos = especiais
+
+  // Ativos: dataLimite >= hoje
+  const especiaisAtivos = especiaisComDatas
     .filter(p => p.dataLimiteObj >= hojeLimpo)
     .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj);
-  
-  // Já passados: dataLimite < hoje, ordenados do mais recente para o mais antigo
-  const especiaisPassados = especiais
+
+  // Passados: dataLimite < hoje
+  const especiaisPassados = especiaisComDatas
     .filter(p => p.dataLimiteObj < hojeLimpo)
     .sort((a, b) => b.dataLimiteObj - a.dataLimiteObj);
-  
-  // Junta: ativos primeiro, passados depois
+
+  // Junta: ativos primeiro, depois passados
   const especiaisOrdenados = [...especiaisAtivos, ...especiaisPassados];
 
   carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
@@ -26,15 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
   carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
 
   // 2. AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
-  const especiais = PROJETOS.especiais.projetos;
+  // Usa a mesma lista especiaisComDatas para reaproveitar o parse de data
   const hoje = new Date();
+  hoje.setHours(0,0,0,0); // garantir comparações no mesmo dia
 
   // Encontra o próximo especial com data limite no futuro
-  const proximo = especiais
-    .map(p => ({
-      ...p,
-      dataLimiteObj: new Date(p.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'))
-    }))
+  const proximo = especiaisComDatas
     .filter(p => p.dataLimiteObj > hoje)
     .sort((a, b) => a.dataLimiteObj - b.dataLimiteObj)[0];
 
@@ -51,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================================================
-// Mantém a função carregarProjetos normalmente:
+// Função permanece igual
 function carregarProjetos(tipo, projetos, containerId, templateFile) {
   const container = document.getElementById(containerId);
   projetos.forEach(projeto => {
