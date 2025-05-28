@@ -1,8 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
-  carregarProjetos('especiais', PROJETOS.especiais.projetos, 'especiais-list', 'especiais.html');
+  // Ordena concursos especiais por dataLimite (mais próximo primeiro)
+  const especiaisOrdenados = PROJETOS.especiais.projetos.slice().sort((a, b) => {
+    const dta = new Date(a.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+    const dtb = new Date(b.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
+    return dta - dtb;
+  });
+  carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
   carregarProjetos('mensais', PROJETOS.mensais.projetos, 'mensais-list', 'mensais.html');
   carregarProjetos('acumulados', PROJETOS.acumulados.projetos, 'acumulados-list', 'acumulados.html');
 });
+
 
 // AVISO TOP FIXO — APENAS 15 DIAS ANTES DO FECHAMENTO DOS BOLÕES ESPECIAIS
 (function exibirAvisoTopo() {
@@ -29,14 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("avisoTopo").style.display = "flex";
   }
 })();
-// Ordenar projetos por dataLimite (mais próximo primeiro)
-const especiaisOrdenados = PROJETOS.especiais.projetos.slice().sort((a, b) => {
-  // Converte "DD/MM/AAAA" para "MM/DD/AAAA" (compatível com Date)
-  const dta = new Date(a.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
-  const dtb = new Date(b.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$2/$1/$3'));
-  return dta - dtb;
-});
-carregarProjetos('especiais', especiaisOrdenados, 'especiais-list', 'especiais.html');
 
 function carregarProjetos(tipo, projetos, containerId, templateFile) {
   const container = document.getElementById(containerId);
