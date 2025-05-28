@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const diasRestantes = Math.ceil((proximo.dataLimiteObj - hoje) / (1000 * 60 * 60 * 24));
   // Aparece só se faltar 15 dias ou menos, e some se já passou
   if (diasRestantes > 0 && diasRestantes <= 15) {
-    const mensagem = `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para garantir sua cota no Bolão "${proximo.nome}"!<br>Fechamento no dia ${proximo.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1/$2/$3')}!`;
+    const mensagem = `⏳ Faltam ${diasRestantes} dia${diasRestantes > 1 ? 's' : ''} para garantir sua cota no Bolão "${proximo.nome}"!<br><span class="aviso-fechamento">Fechamento no dia ${proximo.dataLimite.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1/$2/$3')}!</span>`;
     document.getElementById("mensagemAviso").innerHTML = mensagem;
     document.getElementById("btnParticipar").href = "templates/especiais.html?id=" + proximo.id;
     document.getElementById("avisoTopo").style.display = "flex";
